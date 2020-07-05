@@ -1,0 +1,18 @@
+<root>
+    <!-- 是否是调试模式 -->
+    <DEBUG>true</DEBUG>
+    <!-- 是否是CrossServer中心节点（标记为true时，才会进行排行榜处理） -->
+    <CrossServerCenter>true</CrossServerCenter>
+    <WerbServerAddress>127.0.0.1:10041</WerbServerAddress>
+    <!-- 数据库配置 -->
+    <DbConfig>
+        <GameModel>
+            <!-- 最大处于开启状态的连接数 -->
+            <MaxOpenConns>0</MaxOpenConns>
+            <!-- 最大处于空闲状态的连接数 -->
+            <MaxIdleConns>0</MaxIdleConns>
+            <!-- 数据库连接字符串 -->
+            <ConnectionString><![CDATA[root:3314@tcp(1.1.0.0:3314)/fcl2_model_cross?charset=utf8&parseTime=true&loc=Local&timeout=30s]]></ConnectionString>
+        </GameModel>
+    </DbConfig>
+</root>

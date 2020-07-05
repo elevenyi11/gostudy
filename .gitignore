@@ -1,0 +1,11 @@
+!*.exe
+!*.dll
+!*.ide
+debug
+base/*.exe
+container/*.exe
+file/*.exe
+http/*.exe
+httpmiddle/*.exe
+rpc/*.exe
+rpcClient/*.exe
