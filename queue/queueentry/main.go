@@ -19,6 +19,7 @@ func main() {
 	fmt.Println(q.Pop())
 	fmt.Println(q.Pop())
 	fmt.Println(q.Pop())
+
 }
 
 type Node struct {
