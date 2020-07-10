@@ -1,6 +1,7 @@
 package main
 
 import (
+	. "base/basicKnowledge"
 	"fmt"
 	"math"
 	"math/cmplx"
@@ -11,6 +12,19 @@ var (
 	ss = "kk"
 	bb = true
 )
+
+
+func main() {
+	Base64()
+	//enums()
+	//triangle()
+	//variableZeroValue()
+	//variableInitialValue()
+	//variableTypeDeduction()
+	//variableShorter()
+	//euler()
+	//consts()
+}
 
 func variableZeroValue() {
 	var a int
@@ -85,13 +99,3 @@ func consts() {
 	fmt.Println(filename, c)
 }
 
-func main() {
-	enums()
-	triangle()
-	variableZeroValue()
-	variableInitialValue()
-	variableTypeDeduction()
-	variableShorter()
-	euler()
-	consts()
-}
