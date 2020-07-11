@@ -9,3 +9,4 @@ http/*.exe
 httpmiddle/*.exe
 rpc/*.exe
 rpcClient/*.exe
+.vscode

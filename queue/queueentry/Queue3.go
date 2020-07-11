@@ -6,7 +6,7 @@ import (
 )
 
 type Node3 struct {
-	Id int32
+	Id   int32
 	Name string
 }
 
@@ -46,7 +46,7 @@ func (q *Queue3) Push(item *Node3) {
 		oldlast.next = q.last
 	}
 	q.n++
-	if q.n == 2{
+	if q.n == 2 {
 		q.last.prve = q.first
 	}
 	fmt.Println(item)
@@ -67,47 +67,44 @@ func (q *Queue3) Pop() *Node3 {
 	q.n--
 	return item
 }
-func (q *Queue3) Peek() *Node3{
+func (q *Queue3) Peek() *Node3 {
 	return q.first.item
 }
 func (q *Queue3) Remove(req *Node3) {
 	if q.IsEmpty() {
 		return
 	}
-	q.datalock.Lock()
-	defer q.datalock.Unlock()
-
-	oldLast := *q.first
-	fmt.Println(oldLast)
-	currentQueue := *q.first
-	for i:= 0; i < q.n; i++ {
-		tempItem := currentQueue.item
-		if tempItem.Id == req.Id{
-			if currentQueue.next != nil{
-				currentQueue.next.prve = &oldLast
-			}
-			oldLast.next = currentQueue.next
-			q.n--
-			if i == 0{
+	oldLast := &q.first
+	for i := 0; i < q.n; i++ {
+		currentQueue := *oldLast
+		if i == 0 {
+			currentQueue = *oldLast
+		} else {
+			currentQueue = currentQueue.next
+		}
+		if currentQueue.item.Id == req.Id {
+			if i == 0 {
 				q.first = currentQueue.next
-				if q.first != nil{
+				if q.first != nil {
 					q.first.prve = nil
 				}
+			} else {
+				(*oldLast).next = currentQueue.next
+				(*currentQueue.next).prve = *oldLast
 			}
-			if i == q.n{
-				q.last = currentQueue.prve
-				if q.last != nil{
+
+			q.n--
+
+			if i == q.n {
+				q.last = *oldLast
+				if q.last != nil {
 					q.last.next = nil
 				}
 			}
 			break
-		}else{
-			oldLast = currentQueue
 		}
-
-		currentQueue = *currentQueue.next
-		if currentQueue.next == nil{
-			break
+		if i > 0 {
+			oldLast = &currentQueue.next
 		}
 	}
 	return
