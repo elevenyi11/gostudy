@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"syscall"
-	"time"
 )
 
 /*
@@ -76,7 +74,7 @@ func IsPermission(err error) bool
 
 */
 
-func OpenFile(){
+func OpenFile() {
 	file, err := os.Open("file.go") // For read access.
 	if err != nil {
 		log.Fatal(err)
@@ -94,10 +92,10 @@ func OpenFile(){
 	fmt.Println(fileInfo.Name())
 }
 
-func chMod(){
-	file,err:= os.Create("golang.txt")
-	if err !=nil{
-		log.Fatal("err:",err)
+func chMod() {
+	file, err := os.Create("golang.txt")
+	if err != nil {
+		log.Fatal("err:", err)
 	}
 	defer file.Close()
 	fileMode := getFileMode(file)
@@ -110,11 +108,11 @@ func chMod(){
 	// ls -l 看到的 golang.tx 是：-rw-rw-r-T
 	// 当然这里是给文件设置了 sticky 位，对权限不起作用。系统会忽略它。
 }
-func getFileMode(file *os.File) os.FileMode{
+func getFileMode(file *os.File) os.FileMode {
 
-	fileInfo,err := file.Stat()
-	if err != nil{
-		log.Fatal("file stat error:",err)
+	fileInfo, err := file.Stat()
+	if err != nil {
+		log.Fatal("file stat error:", err)
 	}
 	return fileInfo.Mode()
 }

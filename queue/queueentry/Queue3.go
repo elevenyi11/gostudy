@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -36,37 +35,40 @@ func (q *Queue3) Size() int {
 }
 
 func (q *Queue3) Push(item *Node3) {
-	oldlast := q.last
-	q.last = &leaguetopNode{prve: oldlast}
-	q.last.item = item
-	q.last.next = nil
-	if q.IsEmpty() {
-		q.first = q.last
-	} else {
-		oldlast.next = q.last
-	}
+	oldItem := q.last
+	newItem := &leaguetopNode{prve: oldItem, item: item, next: nil}
+	q.last = newItem
 	q.n++
-	if q.n == 2 {
-		q.last.prve = q.first
+	if oldItem == nil {
+		q.first = newItem
+		return
 	}
-	fmt.Println(item)
+	newItem.prve = oldItem
+	oldItem.next = newItem
 }
 
+// 参考 chan.go  func dequeue
 func (q *Queue3) Pop() *Node3 {
-	if q.IsEmpty() {
-		return nil
+	for {
+		if q.first == nil {
+			return nil
+		}
+		item := q.first
+		nextItem := item.next
+		if nextItem == nil {
+			q.first = nil
+			q.last = nil
+		} else {
+			nextItem.prve = nil
+			q.first = nextItem
+			item.next = nil // mark as removed
+		}
+		q.n--
+		return item.item
 	}
-	q.datalock.Lock()
-	defer q.datalock.Unlock()
-	item := q.first.item
-	q.first = q.first.next
-	q.first.prve = nil
-	if q.IsEmpty() {
-		q.last = nil
-	}
-	q.n--
-	return item
 }
+
+// 仅返回 不移除
 func (q *Queue3) Peek() *Node3 {
 	return q.first.item
 }
