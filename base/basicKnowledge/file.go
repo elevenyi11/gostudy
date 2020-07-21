@@ -1,9 +1,22 @@
 package basicKnowledge
 
 import (
+	"archive/zip"
+	"bytes"
 	"fmt"
+	"github.com/bitly/go-simplejson"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/jpeg"
+	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 /*
@@ -71,6 +84,54 @@ Unix 中表示：rwxrwxrwx
 则需拥有对目录 /、/home 以及 /home/studygolang 的执行权限（还要有对文件 abc 自身的读权限）。
 在文件相关操作报错时，可以通过 os.IsPermission 检查是否是权限的问题。
 func IsPermission(err error) bool
+重命名: os.Rename("1.go", "2.go")
+是否相同:
+ f1, _ := os.Stat("1.go")
+ f2, _ := os.Stat("21.go")
+ os.SameFile(f1, f2)
+设置环境变量:
+ os.Setenv("WD_PATH", "D:/golang")
+返回你本地的系统temp目录:
+ dir, _ := os.Getwd()
+ path, _ := ioutil.TempDir(dir, "tmp")
+ //这个返回的是系统temp
+ temp := os.TempDir()
+改变文件的f.Size()这个就改变了文件内容的长度
+os.Truncate("1.go", 10)
+
+os.Getwd() //当前的目录
+os.Getenv("GOPATH") //环境变量
+fmt.Println(os.Getegid())      windows -1  linux  0     //调用者的group的id
+fmt.Println(os.Geteuid())     windows -1  linux  0     //用户的uid
+fmt.Println(os.Getgid())      windows -1  linux  0     //调用者的gid的id
+g, _ := os.Getgroups()
+fmt.Println(g)                windows []  linux  []    //返回的是一个[]int的切片 显示调用者属于组的一系列id
+fmt.Println(os.Getpagesize())  windows 4096linux  4096  //windows里边叫做虚拟内存 linux里边叫做swap
+fmt.Println(os.Getppid())      windows -1  linux  8621  //调用者的组的进程id
+fmt.Println(os.Getuid())    windows -1  linux  0  //调用者的数字用户id
+
+os.Chdir("D:/test/src") //切换目录
+获取文件的信息
+ os.Stat("widuu.go")
+os.Chmod()这个函数的原型是func Chmod(name string, mode FileMode) error改变文件的属性 譬如读写，linux上的0755这样大家可以理解了吧
+os.Chtime()这个包，函数的原形是func Chtimes(name string, atime time.Time, mtime time.Time) error
+输入string的文件的名称 访问时间 创建时间 返回的是error接口信息
+os.Environ()的作用是获取系统的环境变量，函数原形是func Environ() []string返回是环境变量的[]string切片，说道这个就���和其他的一起说明了，那就是os.ClearEnv()清空环境变量
+os.Exit()就是中断程序返回自定义的int类型的代码，函数运行是func Exit(code int)输入一个int的值就可以了
+)函数os.Expand()这个其实就是一个回调函数替换的方法，函数的原形是func Expand(s string, mapping func(string) string) string 输入的是一个string。对应的是func(string)string的替换字符串的方法，如果没有字符就替换为空
+mapping := func(s string) string {
+  m := map[string]string{"widuu": "www.1.net", "xiaowei": "widuu"}
+  return m[s]
+ }
+ data := "hello $xiaowei blog address $widuu"
+ fmt.Printf("%s", os.Expand(data, mapping)) ////输出hello widuu blog address www.1.net}
+)os.ExpandEnv()把字符串的s替换成环境变量的内容，函数的原形是func ExpandEnv(s string) string，输入的当然是要替换的字符，输出的当然还是字符串了
+data := "GOBIN PATH $GOBIN"
+ fmt.Println(os.ExpandEnv(data)) //输出我本地的环境变量的GOBIN的地址GOBIN PATH C:\Go\bin
+os.Hostname()这个函数看字面的思意就懂了，是返回主机的HostName(),函数的原形是func Hostname() (name string, err error)返回主机名字和一个error的接口信息
+ data, _ := os.Hostname()
+ fmt.Println(data) //我是windows环境下返回我的win的主机名 eleven
+gojson:
 
 */
 
@@ -115,4 +176,337 @@ func getFileMode(file *os.File) os.FileMode {
 		log.Fatal("file stat error:", err)
 	}
 	return fileInfo.Mode()
+}
+//追加内容到文件末尾的办法
+//Seek()查到文件末尾的偏移量
+//WriteAt()则从偏移量开始写入
+func appendToFile(fileName string, content string) error{
+	// 以只写的模式，打开文件
+	f,err := os.OpenFile(fileName, os.O_WRONLY,0644)
+	if err != nil{
+		fmt.Println("create file failed error :", err.Error())
+		return err
+	}
+	defer f.Close()
+	// 查找文件末尾的偏移量
+	n,_:= f.Seek(0,os.SEEK_END)
+	// 从末尾的偏移量开始写入内容
+	_,err =  f.WriteAt([]byte(content), n)
+	return err
+
+}
+
+func WriteFile(){
+	f, err := os.OpenFile("file2.txt",os.O_RDWR | os.O_CREATE | os.O_APPEND, 0x644)
+	if err != nil{
+		panic(err)
+	}
+	defer f.Close()
+	wint,err := f.WriteString("hello world")
+	if err != nil{
+		panic(err)
+	}
+	fmt.Printf("%d\n",wint)
+	_,err = f.Seek(0,0)
+	if err != nil{
+		panic(err)
+	}
+	bs:=make([]byte,100)
+	rint, err := f.Read(bs)
+	if err != nil{
+		panic(err)
+	}
+	fmt.Printf("%d, %s \n", rint,bs)
+}
+
+func TestImage(){
+	f1,err := os.Open("1.jpg")
+	if err != nil{
+		panic(err)
+	}
+	defer f1.Close()
+	f2, err := os.Open("2.jpg")
+	if err != nil{
+		panic(err)
+	}
+	defer f2.Close()
+	f3,err := os.Open("3.jpg")
+	if err != nil{
+		panic(err)
+	}
+	defer f3.Close()
+	m1,err := jpeg.Decode(f1)
+	if err!=nil{
+		panic(err)
+	}
+	bounds := m1.Bounds()
+	m2,err:= jpeg.Decode(f2)
+	if err !=nil{
+		panic(err)
+	}
+	m:= image.NewRGBA(bounds)
+	white := color.RGBA{255,255,255,255}
+	draw.Draw(m,bounds,&image.Uniform{white},image.ZP,draw.Src)
+	draw.Draw(m,bounds,m1,image.ZP,draw.Src)
+	draw.Draw(m,image.Rect(100,200,300,600),m2,image.Pt(250,60),draw.Src)
+	err = jpeg.Encode(f3,m,&jpeg.Options{90})
+	if err != nil{
+		panic(err)
+	}
+	fmt.Printf("ok\n")
+}
+
+func OsRead(){
+	b := make([]byte,100) //设置读取的字节数
+	f,_:= os.Open("base.go")
+	n,_:= f.Read(b)
+	fmt.Println(n)
+	fmt.Println(string(b[:n]))//输出内容 为什么是n而不直接输入100呢？底层这样实现的
+	/*
+	  n, e := f.read(b)
+	     if n < 0 {
+	       n = 0
+	     }
+	  if n == 0 && len(b) > 0 && e == nil {
+	     return 0, io.EOF
+	    }
+	*/
+	//所以字节不足100就读取n
+}
+
+// 加入下标，可以自定义读取多少
+func OsReadAt(){
+	f,_:= os.Open("base.go")
+	b := make([]byte,20)
+	n,_:= f.ReadAt(b,15)
+	fmt.Println(n)
+	fmt.Println(string(b[:n]))
+}
+
+//打开一个文件夹，然后设置读取文件夹文件的个数，返回的是文件的fileinfo信息
+func OsReaddir()  {
+	f,err:= os.Open("src") //打开一个目录
+	if err != nil{
+		fmt.Println(err)
+	}
+	defer  f.Close()
+	ff,_:= f.Readdir(10)//设置读取的数量 <=0是读取所有的文件 返回的[]fileinfo
+	for i, fi := range ff {
+		fmt.Printf("filename %d: %+v\n",i,fi.Name()) //输出文件的名称
+	}
+}
+
+//返回的是文件名 []string的slice
+func OsReaddirnames()  {
+	f, _ := os.Open("bin")
+	names, err := f.Readdirnames(0)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for i, name := range names {
+		fmt.Printf("filename %d: %s\n", i, name)
+	}
+}
+
+//(f *File).Seek()这个函数大家一看就懂了，就是偏移指针的地址，函数的原型是
+//func (f *File) Seek(offset int64, whence int) (ret int64, err error)
+//其中offset是文件指针的位置 whence为0时代表相对文件开始的位置，
+//1代表相对当前位置，2代表相对文件结尾的位置 ret返回的是现在指针的位置
+func OsReadSeek(){
+	b := make([]byte, 10)
+	f, _ := os.Open("1.go")
+	defer f.Close()
+	f.Seek(1, 0)    //相当于开始位置偏移1
+	n, _ := f.Read(b)
+	fmt.Println(string(b[:n]))  //原字符package 输出ackage
+}
+
+//返回的是n写入的字节数
+func OsReadAppend() {
+	f, _ := os.OpenFile("1.go", os.O_RDWR|os.O_APPEND, 0755) //以追加和读写的方式去打开文件
+	n, _ := f.Write([]byte("helloword"))                     //我们写入hellword
+	fmt.Println(n)                                           //打印写入的字节数
+	b := make([]byte, 20)
+	f.Seek(0, 0)            //指针返回到0
+	data, _ := f.Read(b)
+	fmt.Println(string(b[:data]))        //输出了packagehelloword
+}
+
+//在偏移位置多少的地方写入
+func OsWriteAt() {
+	f, _ := os.OpenFile("1.go", os.O_RDWR, os.ModePerm)
+	f.WriteAt([]byte("widuu"), 10) //在偏移10的地方写入
+	b := make([]byte, 20)
+	d, _ := f.ReadAt(b, 10)    //偏移10的地方开始读取
+	fmt.Println(string(b[:d])) //widuudhellowordhello
+}
+
+//写入字符串函数
+func OsWriteString() {
+	f, _ := os.OpenFile("2.go", os.O_RDWR, os.ModePerm)
+	n, _ := f.WriteString("hello word widuu") //写入字符串
+	fmt.Println(n)
+	b := make([]byte, n)
+	f.Seek(0, 0)    //一定要把偏移地址归0否则就一直在写入的结尾处
+	c, _ := f.Read(b)
+	fmt.Println(string(b[:c])) //返回hello word widuu
+}
+
+//创建目录
+func OsCreateFolder() {
+	var path string
+	if os.IsPathSeparator('\\') {  //前边的判断是否是系统的分隔符
+		path = "\\"
+	} else {
+		path = "/"
+	}
+	fmt.Println(path)
+	dir, _ := os.Getwd()  //当前的目录
+	err := os.Mkdir(dir+path+"md", os.ModePerm)  //在当前目录下生成md目录
+	//err := os.MkdirAll(dir+"/a/b/c", os.ModePerm)  //生成多级目录
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("创建目录" + dir + path + "md成功")
+}
+// if err := compress(`gopkg`, `gopkg.zip`); err != nil {
+//    fmt.Println(err)
+//  }
+// 参数frm可以是文件或目录，不会给dst添加.zip扩展名
+func compress(frm, dst string) error {
+	buf := bytes.NewBuffer(make([]byte, 0, 10*1024*1024)) // 创建一个读写缓冲
+	myzip := zip.NewWriter(buf)              // 用压缩器包装该缓冲
+	// 用Walk方法来将所有目录下的文件写入zip
+	err := filepath.Walk(frm, func(path string, info os.FileInfo, err error) error {
+		var file []byte
+		if err != nil {
+			return filepath.SkipDir
+		}
+		header, err := zip.FileInfoHeader(info) // 转换为zip格式的文件信息
+		if err != nil {
+			return filepath.SkipDir
+		}
+		header.Name, _ = filepath.Rel(filepath.Dir(frm), path)
+		if !info.IsDir() {
+			// 确定采用的压缩算法（这个是内建注册的deflate）
+			header.Method = 8
+			file, err = ioutil.ReadFile(path) // 获取文件内容
+			if err != nil {
+				return filepath.SkipDir
+			}
+		} else {
+			file = nil
+		}
+		// 上面的部分如果出错都返回filepath.SkipDir
+		// 下面的部分如果出错都直接返回该错误
+		// 目的是尽可能的压缩目录下的文件，同时保证zip文件格式正确
+		w, err := myzip.CreateHeader(header) // 创建一条记录并写入文件信息
+		if err != nil {
+			return err
+		}
+		_, err = w.Write(file) // 非目录文件会写入数据，目录不会写入数据
+		if err != nil {    // 因为目录的内容可能会修改
+			return err     // 最关键的是我不知道咋获得目录文件的内容
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	myzip.Close()        // 关闭压缩器，让压缩器缓冲中的数据写入buf
+	file, err := os.Create(dst) // 建立zip文件
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = buf.WriteTo(file) // 将buf中的数据写入文件
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+const (
+	DataRoot   = "./tmp/" // 存放封面图的根目录
+	TimeoutLimit = 10    // 设置超时时间
+	PageUrl   = "http://api.lovebizhi.com/macos_v4.php?a=category&spdy=1&tid=3&order=hot&color_id=3&device=105&uuid=436e4ddc389027ba3aef863a27f6e6f9&mode=0&retina=0&client_id=1008&device_id=31547324&model_id=105&size_id=0&channel_id=70001&screen_width=1920&screen_height=1200&bizhi_width=1920&bizhi_height=1200&version_code=19&language=zh-Hans&jailbreak=0&mac=&p={pid}"
+)
+
+// 壁纸类型，有编号，长宽和URL
+type Wallpaper struct {
+	Pid   int
+	Url   string
+	Width  int
+	Height  int
+}
+// 将图片下载并保存到本地
+func SaveImage(paper *Wallpaper) {
+	res, err := http.Get(paper.Url)
+	defer res.Body.Close()
+	if err != nil {
+		fmt.Printf("%d HTTP ERROR:%s", paper.Pid, err)
+		return
+	}
+	//按分辨率目录保存图片
+	Dirname := DataRoot + strconv.Itoa(paper.Width) + "x" + strconv.Itoa(paper.Height) + "/"
+	if ! isDirExist(Dirname) {
+		os.Mkdir(Dirname, 0755);
+		fmt.Printf("dir %s created\n", Dirname)
+	}
+	//根据URL文件名创建文件
+	filename := filepath.Base(paper.Url)
+	dst, err := os.Create(Dirname + filename)
+	if err != nil {
+		fmt.Printf("%d HTTP ERROR:%s", paper.Pid, err)
+		return
+	}
+	// 写入文件
+	io.Copy(dst, res.Body)
+}
+func isDirExist(path string) bool {
+	p, err := os.Stat(path)
+	if err != nil {
+		return os.IsExist(err)
+	} else {
+		return p.IsDir()
+	}
+}
+func TestDownloadImage() {
+	//检查并创建临时目录
+	if ! isDirExist(DataRoot) {
+		os.Mkdir(DataRoot, 0755);
+		fmt.Printf("dir %s created", DataRoot)
+	}
+	//生成一个数据序列，用来获取分页
+	pow := make([]int, 2)
+	for i := range pow {
+		if (i > 0) {
+			url := strings.Replace(PageUrl, "{pid}", strconv.Itoa(i), -1);
+			fmt.Println(i, url);
+			response, err := http.Get(url)
+			if( err != nil) {
+				fmt.Println(err)
+				continue
+			}
+			body, _ := ioutil.ReadAll(response.Body)
+			js, err := simplejson.NewJson(body)
+			//遍历data下的所有数据
+			data := js.Get("data").MustArray()
+			for _, v := range data {
+				v := v.(map[string]interface{})
+				for kk, vv := range v {
+					if(kk == "file_id") {
+						//这里 vv 是一个[]interface{} json.Number，不知道怎么取出值，这里用了比较傻的Sprintf
+						vv := fmt.Sprintf("%s", vv)
+						imgid,_ := strconv.Atoi(vv)
+						url := fmt.Sprintf("http://s.qdcdn.com/c/%d,1920,1200.jpg", imgid)
+						fmt.Println(kk, imgid, url);
+						paper := &Wallpaper{imgid, url, 1920, 1200}
+						SaveImage(paper);
+					}
+				}
+			}
+		}
+	}
+	fmt.Println("oh yes, all job done.")
 }

@@ -1,4 +1,4 @@
-package main
+package queue
 
 // A FIFO queue
 type Queue2 []int

@@ -1,9 +1,8 @@
 package main
 
 import (
+	"errors"
 	"reflect"
-
-	"github.com/pkg/errors"
 )
 
 type Stack struct {

@@ -37,3 +37,7 @@ func TestChan(t *testing.T) {
 
 	time.Sleep(10 * time.Second)
 }
+
+func TestTestBit(t *testing.T) {
+	TestBit()
+}

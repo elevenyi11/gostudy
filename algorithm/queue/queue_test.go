@@ -1,6 +1,7 @@
-package main
+package queue
 
 import (
+	"container/list"
 	"fmt"
 	"strconv"
 	"testing"
@@ -25,21 +26,15 @@ func ExampleQueue2_Pop() {
 	// true
 }
 
-func ExampleQueue_Pop() {
-	q := NewQueue()
-
-	node1 := &Node{Id: 1, Name: "1111"}
-	fmt.Println(&node1)
-	q.Push(node1)
-	node2 := &Node{Id: 2, Name: "2222"}
-	fmt.Println(&node2)
-	q.Push(node2)
-	fmt.Println(q.IsEmpty())
-	fmt.Println(q.Pop())
-	fmt.Println(q.IsEmpty())
-	fmt.Println(q.Pop())
-	fmt.Println(q.Pop())
-	fmt.Println(q.Pop())
+func TestList(t *testing.T){
+	l := list.New()
+	e4 := l.PushBack(4)
+	e1:= l.PushFront(1)
+	l.InsertBefore(3,e4)
+	l.InsertAfter(2,e1)
+	for e := l.Front(); e != nil; e = e.Next() {
+		fmt.Println(e.Value)
+	}
 }
 
 func TestExampleQueue3(t *testing.T) {
@@ -98,9 +93,9 @@ func BenchmarkSprintf(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		node1 := &Node{Id: i, Name: "N:" + strconv.Itoa(i)}
+		node1 := &Node3{Id: int32(i), Name: "N:" + strconv.Itoa(i)}
 		q.Push(node1)
-		pop, _ := q.Pop().(*Node)
+		pop, _ := q.Pop().(*Node3)
 		fmt.Sprintf("%d: push:%v--pop:%v", i, &node1, &pop)
 	}
 }

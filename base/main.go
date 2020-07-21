@@ -1,7 +1,6 @@
 package main
 
 import (
-	. "base/basicKnowledge"
 	"fmt"
 	"math"
 	"math/cmplx"
@@ -15,7 +14,7 @@ var (
 
 
 func main() {
-	Base64()
+	//Base64()
 	//enums()
 	//triangle()
 	//variableZeroValue()
@@ -25,6 +24,7 @@ func main() {
 	//euler()
 	//consts()
 }
+
 
 func variableZeroValue() {
 	var a int
