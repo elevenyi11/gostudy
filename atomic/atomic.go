@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -35,4 +36,8 @@ func main() {
 	}()
 	time.Sleep(time.Second)
 	fmt.Println(a.get())
+}
+
+func worker(){
+	atomic.AddInt32()
 }
