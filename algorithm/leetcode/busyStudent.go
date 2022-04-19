@@ -12,7 +12,3 @@ func busyStudent(startTime []int, endTime []int, queryTime int) int {
 	}
 	return result
 }
-
-func coinChange(coins []int, amount int) int {
-
-}
