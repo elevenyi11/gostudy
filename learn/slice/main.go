@@ -21,6 +21,16 @@ func main() {
 	fmt.Println("cap:", cap(sliceB))
 	fmt.Println("len:", len(sliceB))
 
+	sliceC := sliceA[1:2:4]
+	fmt.Println("sliceC:", sliceC)
+	fmt.Println("cap:", cap(sliceC))
+	fmt.Println("len:", len(sliceC))
+
+	sliceD := sliceA[0:2:4]
+	fmt.Println("sliceD:", sliceD)
+	fmt.Println("cap:", cap(sliceD))
+	fmt.Println("len:", len(sliceD))
+
 	slice2 := []int{1, 2, 3, 4, 5}
 	newslice := slice2[0:3]
 	fmt.Println("newslice:", newslice)

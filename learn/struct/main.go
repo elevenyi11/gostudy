@@ -8,8 +8,16 @@ type Student struct {
 	Person
 }
 
+func (s *Student) Hello() {
+	fmt.Printf("Student say hello haha")
+}
+
 type Person struct {
 	PhoneNumber int
+}
+
+func (p *Person) Hello() {
+	fmt.Printf("hello haha")
 }
 
 func main() {
@@ -21,6 +29,6 @@ func main() {
 	fmt.Println(stu)
 
 	fmt.Println(Student{Age: 16, Name: "haha", Address: "chengdu", Person: Person{12321}})
-
+	stu.Hello()
 	return
 }
