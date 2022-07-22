@@ -1,30 +1,12 @@
 package main
 
-import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
-	"time"
-
-	"goji.io/pat"
-
-	"gopkg.in/mgo.v2/bson"
-
-	"gopkg.in/mgo.v2"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
-)
-
 type Trainer struct {
 	Name string
 	Age  int
 	City string
 }
 
+/*
 func ping() {
 
 	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
@@ -260,3 +242,4 @@ func DeleteBook(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+*/

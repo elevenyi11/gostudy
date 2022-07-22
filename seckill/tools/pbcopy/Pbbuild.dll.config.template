@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+	<appSettings>
+  <add key="sourceDir" value="E:\Work\ServerCode\sd3New\CSCommon\cscommon\grpc\Csharp" />
+  <add key="tarDir" value="E:\Work\ServerCode\sd3New\rpcmodel" />
+  <add key="referenceFilesDir" value="E:\Work\ServerCode\sd3New\gameserver\SheDiao3\ReferenceFiles" />
+ </appSettings>
+</configuration>
